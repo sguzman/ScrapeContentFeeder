@@ -3,20 +3,29 @@ import requests
 import os
 import brotli
 import redis
-import sys
-import pygithub
-import GitPython
+import github
 
 limit = 1290
 redis_key = "ebooks"
 client = redis.StrictRedis()
 cache = client.hgetall(redis_key)
+github_user_env = 'GITHUB_USER'
+github_user = os.environ[github_user_env]
+github_pass_env = 'GITHUB_PASS'
+github_pass = os.environ[github_pass_env]
+g = github.Github(github_user, github_pass)
 
 
 def remove_prefix(text, prefix):
     if text.startswith(prefix):
         return text[len(prefix):].replace('/', '')
     return text
+
+
+def create_dir(dir_name):
+    if not os.path.exists(dir_name):
+        print('Creating dir %s' % dir_name)
+        os.mkdir(dir_name)
 
 
 def get_redis(url):
@@ -55,9 +64,8 @@ def write(file_name, content):
 
 
 def main():
-    dir_name = "../txt/"
-    if not os.path.exists(dir_name):
-        os.mkdir(dir_name)
+    dir_name = "./ScrapeContent/txt/"
+    create_dir(dir_name)
 
     for i in range(1, limit + 1):
         for path in get_links(i):
