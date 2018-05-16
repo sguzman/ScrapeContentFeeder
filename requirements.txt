@@ -1,0 +1,6 @@
+brotli
+requests
+bs4
+redis
+pygithub
+GitPython

@@ -1,0 +1,3 @@
+[submodule "ScrapeContent"]
+	path = ScrapeContent
+	url = https://github.com/sguzman/ScrapeContent
