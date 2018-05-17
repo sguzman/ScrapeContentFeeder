@@ -1,4 +1,4 @@
 brotli
 requests
 bs4
-redis
+GitPython
