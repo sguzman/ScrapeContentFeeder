@@ -3,7 +3,6 @@ import requests
 import os
 import brotli
 import redis
-import git
 
 limit = 1290
 redis_key = "ebooks"
@@ -59,30 +58,6 @@ def write(file_name, content):
 
 
 def main():
-    print('Got %d cache entries' % len(cache))
-
-    dir_name = "./ScrapeContent/txt/"
-    create_dir(dir_name)
-
-    should_break = False
-    new_items = False
-    for i in range(1, limit + 1):
-        for path in get_links(i):
-            file = f'{dir_name}{path}.txt.brotli'
-            should_break = os.path.exists(file)
-            if should_break:
-                break
-            else:
-                new_items = True
-                print(file)
-                html = get_book(path)
-                bro = brotli.compress(html.encode(), brotli.MODE_TEXT)
-                write(file, bro)
-
-        if should_break:
-            break
-
-    if new_items:
-        print('new items available')
+    repo = git.Repo()
 
 main()
