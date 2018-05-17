@@ -3,17 +3,12 @@ import requests
 import os
 import brotli
 import redis
-import github
+import git
 
 limit = 1290
 redis_key = "ebooks"
 client = redis.StrictRedis()
 cache = client.hgetall(redis_key)
-github_user_env = 'GITHUB_USER'
-github_user = os.environ[github_user_env]
-github_pass_env = 'GITHUB_PASS'
-github_pass = os.environ[github_pass_env]
-g = github.Github(github_user, github_pass)
 
 
 def remove_prefix(text, prefix):
@@ -35,7 +30,7 @@ def get_redis(url):
         client.hset(redis_key, url, bro)
         print(f'{url} -> {len(bro)}')
     else:
-        html = cache[url]
+        html = brotli.decompress(cache[url])
 
     return html
 
@@ -64,17 +59,30 @@ def write(file_name, content):
 
 
 def main():
+    print('Got %d cache entries' % len(cache))
+
     dir_name = "./ScrapeContent/txt/"
     create_dir(dir_name)
 
+    should_break = False
+    new_items = False
     for i in range(1, limit + 1):
         for path in get_links(i):
             file = f'{dir_name}{path}.txt.brotli'
-            if not os.path.exists(file):
+            should_break = os.path.exists(file)
+            if should_break:
+                break
+            else:
+                new_items = True
                 print(file)
                 html = get_book(path)
                 bro = brotli.compress(html.encode(), brotli.MODE_TEXT)
                 write(file, bro)
 
+        if should_break:
+            break
+
+    if new_items:
+        print('new items available')
 
 main()
